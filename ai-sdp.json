@@ -1,0 +1,65 @@
+{
+  "name": "ai-sdp",
+  "description": "AI-Assisted Software Development Process - Guides through structured development cycles with web research, collaborative decision-making, state management, and comprehensive project tracking",
+  "prompt": "file://./ai-sdp/prompt.md",
+  "mcpServers": {
+    "awslabs.core-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "awslabs.core-mcp-server@latest"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "aws-foundation": "true",
+        "dev-tools": "true",
+        "frontend-dev": "true"
+      },
+      "autoApprove": [
+        "prompt_understanding",
+        "aws_knowledge_aws___search_documentation",
+        "aws_knowledge_aws___read_documentation",
+        "aws_knowledge_aws___list_regions",
+        "aws_knowledge_aws___get_regional_availability",
+        "aws_knowledge_aws___recommend",
+        "code_doc_gen_create_context",
+        "code_doc_gen_generate_documentation",
+        "code_doc_gen_plan_documentation",
+        "code_doc_gen_prepare_repository",
+        "frontend_GetReactDocsByTopic",
+        "git_repo_research_search_repos_on_github",
+        "git_repo_research_access_file",
+        "git_repo_research_search_research_repository"
+      ]
+    },
+    "awslabs.aws-diagram-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-diagram-mcp-server@latest"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "autoApprove": []
+    }
+  },
+  "tools": [
+    "fs_read",
+    "fs_write",
+    "execute_bash",
+    "web_search",
+    "web_fetch",
+    "introspect",
+    "@awslabs.core-mcp-server",
+    "@awslabs.aws-diagram-mcp-server"
+  ],
+  "allowedTools": [
+    "fs_read",
+    "fs_write",
+    "execute_bash",
+    "web_search",
+    "web_fetch",
+    "introspect",
+    "@awslabs.core-mcp-server",
+    "@awslabs.aws-diagram-mcp-server"
+  ]
+}
