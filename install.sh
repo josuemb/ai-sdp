@@ -113,8 +113,7 @@ download_directory() {
     fi
     
     # Parse JSON response to get files and directories
-    echo "$response" | grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"[^}]*"type"[[:space:]]*:[[:space:]]*"[^"]*"' | \
-    sed 's/"name"[[:space:]]*:[[:space:]]*"\([^"]*\)"[^}]*"type"[[:space:]]*:[[:space:]]*"\([^"]*\)"/\1\t\2/' | \
+    echo "$response" | jq -r '.[] | "\(.name)\t\(.type)"' 2>/dev/null | \
     while IFS=$'\t' read -r name type; do
         [[ -n "$name" && -n "$type" ]] || continue
         
