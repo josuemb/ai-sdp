@@ -40,62 +40,6 @@ Examples:
 EOF
 }
 
-# Clean up any existing agent installation
-# Arguments:
-#   $1 - Installation directory path
-cleanup_existing_agent() {
-    local -r install_dir="$1"
-    
-    # Remove existing agent JSON file
-    if [[ -f "$install_dir/$AGENT_JSON" ]]; then
-        echo "🧹 Removing existing $install_dir/$AGENT_JSON"
-        rm -f "$install_dir/$AGENT_JSON"
-    fi
-    
-    # Remove existing agent support directory
-    if [[ -d "$install_dir/$AGENT_NAME" ]]; then
-        echo "🧹 Removing existing $install_dir/$AGENT_NAME/"
-        rm -rf "$install_dir/$AGENT_NAME"
-    fi
-}
-
-# Recursively download directory contents from GitHub
-# Arguments:
-#   $1 - GitHub API path (e.g., "ai-sdp" or "ai-sdp/core")
-#   $2 - Local directory path
-download_directory() {
-    local -r api_path="$1"
-    local -r local_path="$2"
-    
-    local -r api_url="https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/contents/$api_path"
-    local response
-    
-    if ! response=$(curl -fsSL "$api_url" 2>/dev/null); then
-        echo "⚠️  Warning: Failed to fetch $api_path" >&2
-        return 1
-    fi
-    
-    # Parse JSON response to get files and directories
-    echo "$response" | grep -E '"(name|type)"[[:space:]]*:' | paste - - | while IFS=$'\t' read -r name_line type_line; do
-        local name=$(echo "$name_line" | sed 's/.*"name"[[:space:]]*:[[:space:]]*"//g' | sed 's/".*//g')
-        local type=$(echo "$type_line" | sed 's/.*"type"[[:space:]]*:[[:space:]]*"//g' | sed 's/".*//g')
-        
-        [[ -n "$name" ]] || continue
-        
-        if [[ "$type" == "file" ]]; then
-            echo "    📄 $api_path/$name"
-            mkdir -p "$local_path"
-            if ! curl -fsSL "$REPO_URL/raw/$MAIN_BRANCH/$api_path/$name" -o "$local_path/$name" 2>/dev/null; then
-                echo "⚠️  Warning: Failed to download $api_path/$name" >&2
-            fi
-        elif [[ "$type" == "dir" ]]; then
-            echo "  📁 $api_path/$name/"
-            mkdir -p "$local_path/$name"
-            download_directory "$api_path/$name" "$local_path/$name"
-        fi
-    done
-}
-
 # Download and install agent files from GitHub
 # Arguments:
 #   $1 - Installation directory path
@@ -116,8 +60,8 @@ remote_install() {
     # Ensure cleanup on exit
     trap "rm -rf '$temp_dir'" EXIT
     
-    # Download main agent JSON file
-    echo "⬇️  Downloading $AGENT_JSON..."
+    # Download main files
+    echo "⬇️  Downloading agent files..."
     if ! curl -fsSL "$REPO_URL/raw/$MAIN_BRANCH/$AGENT_JSON" -o "$temp_dir/$AGENT_JSON"; then
         echo "❌ Error: Failed to download $AGENT_JSON" >&2
         exit 1
@@ -127,10 +71,47 @@ remote_install() {
     local -r agent_support_dir="$install_dir/$AGENT_NAME"
     mkdir -p "$agent_support_dir"
     
-    echo "🔍 Downloading all $AGENT_NAME content recursively..."
+    echo "🔍 Discovering files from GitHub..."
     
-    # Download all content from ai-sdp directory recursively
-    download_directory "$AGENT_NAME" "$agent_support_dir"
+    # Get directory contents from GitHub API
+    local -r api_url="https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/contents/$AGENT_NAME"
+    local response
+    if ! response=$(curl -fsSL "$api_url"); then
+        echo "❌ Error: Failed to fetch directory listing" >&2
+        exit 1
+    fi
+    
+    # Download prompt.md file
+    echo "  📄 Downloading prompt.md"
+    if ! curl -fsSL "$REPO_URL/raw/$MAIN_BRANCH/$AGENT_NAME/prompt.md" -o "$agent_support_dir/prompt.md"; then
+        echo "❌ Error: Failed to download prompt.md" >&2
+        exit 1
+    fi
+    
+    # Download known directories
+    local -r directories=(core cycles framework integrations details)
+    for dir in "${directories[@]}"; do
+        if echo "$response" | grep -q "\"name\"[[:space:]]*:[[:space:]]*\"$dir\""; then
+            echo "  📁 Downloading $dir directory"
+            mkdir -p "$agent_support_dir/$dir"
+            
+            # Get files in directory
+            local dir_response
+            if dir_response=$(curl -fsSL "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/contents/$AGENT_NAME/$dir"); then
+                # Extract file names and download them
+                local files
+                files=$(echo "$dir_response" | grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"name"[[:space:]]*:[[:space:]]*"//g' | sed 's/".*//g')
+                
+                while IFS= read -r file; do
+                    [[ -n "$file" ]] || continue
+                    echo "    📄 $dir/$file"
+                    if ! curl -fsSL "$REPO_URL/raw/$MAIN_BRANCH/$AGENT_NAME/$dir/$file" -o "$agent_support_dir/$dir/$file"; then
+                        echo "⚠️  Warning: Failed to download $dir/$file" >&2
+                    fi
+                done <<< "$files"
+            fi
+        fi
+    done
     
     # Copy agent JSON to final location
     cp "$temp_dir/$AGENT_JSON" "$install_dir/"
@@ -181,9 +162,6 @@ fi
 # Create installation directory
 echo "Creating directory: $install_dir"
 mkdir -p "$install_dir"
-
-# Clean up any existing installation
-cleanup_existing_agent "$install_dir"
 
 # Perform remote installation
 remote_install "$install_dir"
