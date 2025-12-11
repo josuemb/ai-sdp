@@ -43,7 +43,7 @@ validate_custom_path() {
     
     # Block system directories
     case "$path" in
-        /etc|/etc/*|/usr|/usr/*|/bin|/bin/*|/sbin|/sbin/*|/root|/root/*|/var/log|/var/log/*|/proc|/proc/*|/sys|/sys/*|/boot|/boot/*|/dev|/dev/*|/lib|/lib/*|/lib64|/lib64/*)
+        /etc|/etc/*|/usr|/usr/*|/bin|/bin/*|/sbin|/sbin/*|/root|/root/*|/var/log|/var/log/*|/proc|/proc/*|/sys|/sys/*|/boot|/boot/*|/dev|/dev/*|/lib|/lib/*|/lib64|/lib64/*|/opt|/opt/*)
             echo "❌ Error: System directory not allowed" >&2
             exit 1
             ;;
@@ -85,9 +85,15 @@ validate_api_response() {
         return 1
     fi
     
-    # Check if looks like JSON
-    if [[ ! "$response" =~ ^[\[\{].*[\]\}]$ ]]; then
+    # Check if looks like JSON (flexible validation without jq)
+    if [[ ! "$response" =~ ^\[.*\]$ ]] && [[ ! "$response" =~ ^\{.*\}$ ]]; then
         echo "❌ Error: Invalid API response format" >&2
+        return 1
+    fi
+    
+    # Additional check for GitHub API structure (multiline aware)
+    if ! echo "$response" | grep -q '"name"' || ! echo "$response" | grep -q '"type"'; then
+        echo "❌ Error: Response missing required fields" >&2
         return 1
     fi
     
@@ -112,8 +118,26 @@ download_directory() {
         return 1
     fi
     
-    # Parse JSON response to get files and directories
-    echo "$response" | jq -r '.[] | "\(.name)\t\(.type)"' 2>/dev/null | \
+    # Parse JSON response to get files and directories (robust jq-free approach)
+    # Process each JSON object separately to handle GitHub API format
+    echo "$response" | \
+    grep -A 20 -B 5 '"name"[[:space:]]*:' | \
+    awk '
+    /"name"[[:space:]]*:/ { 
+        gsub(/.*"name"[[:space:]]*:[[:space:]]*"/, ""); 
+        gsub(/".*/, ""); 
+        name = $0; 
+    }
+    /"type"[[:space:]]*:/ { 
+        gsub(/.*"type"[[:space:]]*:[[:space:]]*"/, ""); 
+        gsub(/".*/, ""); 
+        type = $0; 
+        if (name && type) {
+            print name "\t" type; 
+            name = ""; 
+            type = "";
+        }
+    }' | \
     while IFS=$'\t' read -r name type; do
         [[ -n "$name" && -n "$type" ]] || continue
         
@@ -130,7 +154,7 @@ download_directory() {
             if curl -fsSL --max-time 60 --max-filesize 10485760 "$REPO_URL/raw/$MAIN_BRANCH/$api_path/$safe_name" -o "$local_path/$safe_name"; then
                 chmod 644 "$local_path/$safe_name"
             else
-                echo "⚠️  Warning: Failed to download $api_path/$safe_name" >&2
+                echo "⚠️  Warning: Failed to download $api_path/$name" >&2
             fi
         elif [[ "$type" == "dir" ]]; then
             echo "  📁 $api_path/$safe_name/"
@@ -183,7 +207,7 @@ remote_install() {
     local -r temp_dir=$(mktemp -d)
     chmod 700 "$temp_dir"
     # Ensure cleanup on exit
-    trap "rm -rf $(printf %q "$temp_dir")" EXIT
+    trap 'rm -rf "$temp_dir"' EXIT
     
     # Download main files
     echo "⬇️  Downloading agent files..."
@@ -214,7 +238,7 @@ remote_install() {
 install_type="global"
 custom_path=""
 
-while (( $# > 0 )); do
+while [[ $# -gt 0 ]]; do
     case $1 in
         -g|--global)
             install_type="global"
