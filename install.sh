@@ -135,7 +135,7 @@ download_directory() {
             echo "  📁 $api_path/$safe_name/"
             mkdir -p "$local_path/$safe_name"
             chmod 750 "$local_path/$safe_name"
-            download_directory "$api_path/$name" "$local_path/$safe_name"
+            download_directory "$api_path/$safe_name" "$local_path/$safe_name"
         fi
     done
 }
