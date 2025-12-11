@@ -300,6 +300,9 @@ Installation details:
 Usage:
   $CLI_COMMAND
 
+
+# Clean up any existing installation
+cleanup_existing_agent "$install_dir"
 EOF
 else
     echo "❌ Installation failed" >&2
