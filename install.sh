@@ -203,7 +203,7 @@ remote_install() {
     local -r temp_dir=$(mktemp -d)
     chmod 700 "$temp_dir"
     # Ensure cleanup on exit
-    trap 'rm -rf "$temp_dir"' EXIT
+    trap "rm -rf $(printf %q "$temp_dir")" EXIT
     
     # Download main files
     echo "⬇️  Downloading agent files..."
