@@ -140,27 +140,6 @@ download_directory() {
     done
 }
 
-# Safer JSON parsing with multiple validation steps
-parse_json_names() {
-    local json_response="$1"
-    
-    # First validate JSON structure more thoroughly
-    if ! echo "$json_response" | grep -q '"name".*"type"'; then
-        return 1
-    fi
-    
-    # Extract names with safer approach
-    echo "$json_response" | \
-        grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' | \
-        sed 's/^[^"]*"//; s/"[^"]*$//' | \
-        while IFS= read -r name; do
-            # Additional validation per name
-            if [[ -n "$name" && ${#name} -lt 200 ]]; then
-                echo "$name"
-            fi
-        done
-}
-
 # Display usage information
 show_usage() {
     cat << 'EOF'
