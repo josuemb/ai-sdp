@@ -84,7 +84,7 @@ validate_api_response() {
     fi
     
     # Check if looks like JSON
-    if [[ ! "$response" =~ ^\[.*\]$ ]]; then
+    if [[ ! "$response" =~ ^[\[\{].*[\]\}]$ ]]; then
         echo "❌ Error: Invalid API response format" >&2
         return 1
     fi
