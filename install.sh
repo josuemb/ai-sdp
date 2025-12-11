@@ -43,7 +43,7 @@ validate_custom_path() {
     
     # Block system directories
     case "$path" in
-        /etc|/etc/*|/usr|/usr/*|/bin|/bin/*|/sbin|/sbin/*|/root|/root/*|/var/log|/var/log/*|/proc|/proc/*|/sys|/sys/*|/boot|/boot/*|/dev|/dev/*|/lib|/lib/*|/lib64|/lib64/*|/opt|/opt/*)
+        /etc|/etc/*|/usr|/usr/*|/bin|/bin/*|/sbin|/sbin/*|/root|/root/*|/var/log|/var/log/*|/proc|/proc/*|/sys|/sys/*|/boot|/boot/*|/dev|/dev/*|/lib|/lib/*|/lib64|/lib64/*)
             echo "❌ Error: System directory not allowed" >&2
             exit 1
             ;;
