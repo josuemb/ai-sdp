@@ -22,7 +22,7 @@ validate_custom_path() {
     local path="$1"
     
     # Check for command injection attempts
-    if [[ "$path" =~ [';|&$`()'] ]]; then
+    if [[ "$path" =~ [\';|&$`()\\] ]]; then
         echo "❌ Error: Invalid characters in path" >&2
         exit 1
     fi
