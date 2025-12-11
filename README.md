@@ -7,29 +7,30 @@ This is a [custom agent](https://kiro.dev/docs/cli/custom-agents/) for Kiro CLI 
 ## Prerequisites
 
 - **Kiro CLI**: [Installation Guide](https://kiro.dev/docs/cli/installation/)
+- **curl**: Required for remote installation (pre-installed on most systems)
 - **Supported OS**: macOS, Linux, Windows Subsystem for Linux
 - **uv/uvx**: Required for MCP servers - [Installation Guide](https://docs.astral.sh/uv/getting-started/installation/)
 
 ## Installation
 
-### Quick Install (Global)
+### Global Installation (Recommended)
 ```bash
-./install.sh
+curl -sSL https://raw.githubusercontent.com/josuemb/ai-sdp/main/install.sh | bash
 ```
 
-### Installation Options
+### Local Installation (Project-specific)
 ```bash
-# Global installation (default)
-./install.sh --global
+curl -sSL https://raw.githubusercontent.com/josuemb/ai-sdp/main/install.sh | bash -s -- --local
+```
 
-# Local installation (project-specific)
-./install.sh --local
+### Custom Path Installation
+```bash
+curl -sSL https://raw.githubusercontent.com/josuemb/ai-sdp/main/install.sh | bash -s -- /path/to/custom/agents
+```
 
-# Custom path
-./install.sh /path/to/custom/agents
-
-# Help
-./install.sh --help
+### Installation Help
+```bash
+curl -sSL https://raw.githubusercontent.com/josuemb/ai-sdp/main/install.sh | bash -s -- --help
 ```
 
 ## Agent Features
@@ -139,46 +140,44 @@ The agent includes:
 - **Auto-approved Tools**: Pre-configured permissions for seamless workflow
 
 ### File Structure After Installation
+
+**Global Installation:**
 ```
-~/.kiro/agents/           # Global installation
+~/.kiro/agents/
 ├── ai-sdp.json          # Agent configuration
 └── ai-sdp/              # Supporting files
     ├── prompt.md         # Main agent prompt
     ├── core/             # Core workflow files
     ├── cycles/           # Development cycle definitions
     ├── framework/        # Decision framework
-    └── integrations/     # Tool integrations
-
-.kiro/agents/             # Local installation (project-specific)
-├── ai-sdp.json
-└── ai-sdp/
+    ├── integrations/     # Tool integrations
+    └── details/          # Additional documentation
 ```
 
-## Key Capabilities
-
-### Decision Framework
-- Presents 3-5 researched alternatives for technical decisions
-- Requires explicit developer choice
-- Logs all decisions with reasoning
-
-### Testing Integration
-- Mandatory testing requirements for all features
-- Coverage validation and threshold management
-- Automated test implementation guidance
-
-### Documentation Generation
-- Automatic requirements.md creation
-- Decision logging in decisions-log.md
-- Project status tracking in project-status.md
+**Local Installation (Project-specific):**
+```
+.kiro/agents/
+├── ai-sdp.json          # Agent configuration
+└── ai-sdp/              # Supporting files
+    ├── prompt.md         # Main agent prompt
+    ├── core/             # Core workflow files
+    ├── cycles/           # Development cycle definitions
+    ├── framework/        # Decision framework
+    ├── integrations/     # Tool integrations
+    └── details/          # Additional documentation
+```
 
 ## Troubleshooting
 
-### Agent Not Found
+### Verify Installation
 ```bash
-# Verify installation
+# Check if agent is installed
+kiro-cli agent
+
+# Verify files exist (global)
 ls ~/.kiro/agents/ai-sdp.json
 
-# Check local installation
+# Verify files exist (local)
 ls .kiro/agents/ai-sdp.json
 ```
 
@@ -209,7 +208,7 @@ ls .kiro/agents/ai-sdp.json
 
 - **Documentation**: [Kiro CLI Docs](https://github.com/aws/kiro-cli)
 - **Issues**: Use `/issue` command in Kiro CLI
-- **Agent Updates**: Re-run installation script
+- **Reinstallation**: Re-run installation command to get latest version
 
 ## License
 
