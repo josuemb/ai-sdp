@@ -131,7 +131,7 @@ download_directory() {
             if curl -fsSL --max-time 60 --max-filesize 10485760 "$REPO_URL/raw/$MAIN_BRANCH/$api_path/$safe_name" -o "$local_path/$safe_name"; then
                 chmod 644 "$local_path/$safe_name"
             else
-                echo "⚠️  Warning: Failed to download $api_path/$name" >&2
+                echo "⚠️  Warning: Failed to download $api_path/$safe_name" >&2
             fi
         elif [[ "$type" == "dir" ]]; then
             echo "  📁 $api_path/$safe_name/"
