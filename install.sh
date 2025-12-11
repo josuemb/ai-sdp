@@ -100,6 +100,25 @@ validate_api_response() {
     return 0
 }
 
+# Clean up any existing agent installation
+# Arguments:
+#   $1 - Installation directory path
+cleanup_existing_agent() {
+    local -r install_dir="$1"
+    
+    # Remove existing agent JSON file
+    if [[ -f "$install_dir/$AGENT_JSON" ]]; then
+        echo "🧹 Removing existing $install_dir/$AGENT_JSON"
+        rm -f "$install_dir/$AGENT_JSON"
+    fi
+    
+    # Remove existing agent support directory
+    if [[ -d "$install_dir/$AGENT_NAME" ]]; then
+        echo "🧹 Removing existing $install_dir/$AGENT_NAME/"
+        rm -rf "$install_dir/$AGENT_NAME"
+    fi
+}
+
 # Recursively download directory contents from GitHub
 download_directory() {
     local -r api_path="$1"
@@ -191,8 +210,10 @@ EOF
 # Download and install agent files from GitHub
 # Arguments:
 #   $1 - Installation directory path
+#   $2 - Temporary directory path
 remote_install() {
     local -r install_dir="$1"
+    local -r temp_dir="$2"
     
     echo "🚀 Remote installation from GitHub"
     echo "Downloading from: $REPO_URL"
@@ -203,11 +224,6 @@ remote_install() {
         echo "Please install curl and try again" >&2
         exit 1
     fi
-    
-    local -r temp_dir=$(mktemp -d)
-    chmod 700 "$temp_dir"
-    # Ensure cleanup on exit
-    trap 'rm -rf "$temp_dir"' EXIT
     
     # Download main files
     echo "⬇️  Downloading agent files..."
@@ -282,8 +298,17 @@ echo "Creating directory: $install_dir"
 mkdir -p "$install_dir"
 chmod 750 "$install_dir"
 
+# Create temporary directory for downloads
+temp_dir=$(mktemp -d)
+chmod 700 "$temp_dir"
+# Ensure cleanup on exit
+trap 'rm -rf "$temp_dir"' EXIT
+
+# Clean up any existing installation
+cleanup_existing_agent "$install_dir"
+
 # Perform remote installation
-remote_install "$install_dir"
+remote_install "$install_dir" "$temp_dir"
 
 # Verify installation
 if [[ -f "$install_dir/$AGENT_JSON" ]]; then
@@ -300,9 +325,6 @@ Installation details:
 Usage:
   $CLI_COMMAND
 
-
-# Clean up any existing installation
-cleanup_existing_agent "$install_dir"
 EOF
 else
     echo "❌ Installation failed" >&2
