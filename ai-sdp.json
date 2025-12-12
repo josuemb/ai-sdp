@@ -48,6 +48,7 @@
     "execute_bash",
     "web_search",
     "web_fetch",
+    "code",
     "introspect",
     "@awslabs.core-mcp-server",
     "@awslabs.aws-diagram-mcp-server"
@@ -58,6 +59,7 @@
     "execute_bash",
     "web_search",
     "web_fetch",
+    "code",
     "introspect",
     "@awslabs.core-mcp-server",
     "@awslabs.aws-diagram-mcp-server"
