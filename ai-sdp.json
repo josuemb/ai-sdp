@@ -3,32 +3,19 @@
   "description": "AI-Assisted Software Development Process - Guides through structured development cycles with web research, collaborative decision-making, state management, and comprehensive project tracking",
   "prompt": "file://./ai-sdp/prompt.md",
   "mcpServers": {
-    "awslabs.core-mcp-server": {
+    "awslabs.aws-documentation-mcp-server": {
       "command": "uvx",
       "args": [
-        "awslabs.core-mcp-server@latest"
+        "awslabs.aws-documentation-mcp-server@latest"
       ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR",
-        "aws-foundation": "true",
-        "dev-tools": "true",
-        "frontend-dev": "true"
+        "AWS_DOCUMENTATION_PARTITION": "aws"
       },
       "autoApprove": [
-        "prompt_understanding",
-        "aws_knowledge_aws___search_documentation",
-        "aws_knowledge_aws___read_documentation",
-        "aws_knowledge_aws___list_regions",
-        "aws_knowledge_aws___get_regional_availability",
-        "aws_knowledge_aws___recommend",
-        "code_doc_gen_create_context",
-        "code_doc_gen_generate_documentation",
-        "code_doc_gen_plan_documentation",
-        "code_doc_gen_prepare_repository",
-        "frontend_GetReactDocsByTopic",
-        "git_repo_research_search_repos_on_github",
-        "git_repo_research_access_file",
-        "git_repo_research_search_research_repository"
+        "read_documentation",
+        "search_documentation",
+        "recommend"
       ]
     },
     "awslabs.aws-diagram-mcp-server": {
@@ -48,9 +35,9 @@
     "execute_bash",
     "web_search",
     "web_fetch",
-    "code",
     "introspect",
-    "@awslabs.core-mcp-server",
+    "code",
+    "@awslabs.aws-documentation-mcp-server",
     "@awslabs.aws-diagram-mcp-server"
   ],
   "allowedTools": [
@@ -59,9 +46,9 @@
     "execute_bash",
     "web_search",
     "web_fetch",
-    "code",
     "introspect",
-    "@awslabs.core-mcp-server",
+    "code",
+    "@awslabs.aws-documentation-mcp-server",
     "@awslabs.aws-diagram-mcp-server"
   ]
 }
