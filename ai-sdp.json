@@ -3,19 +3,16 @@
   "description": "AI-Assisted Software Development Process - Guides through structured development cycles with web research, collaborative decision-making, state management, and comprehensive project tracking",
   "prompt": "file://./ai-sdp/prompt.md",
   "mcpServers": {
-    "awslabs.aws-documentation-mcp-server": {
-      "command": "uvx",
-      "args": [
-        "awslabs.aws-documentation-mcp-server@latest"
-      ],
-      "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR",
-        "AWS_DOCUMENTATION_PARTITION": "aws"
-      },
+    "aws-knowledge-mcp-server": {
+      "url": "https://knowledge-mcp.global.api.aws",
+      "type": "http",
+      "disabled": false,
       "autoApprove": [
-        "read_documentation",
         "search_documentation",
-        "recommend"
+        "read_documentation",
+        "recommend",
+        "list_regions",
+        "get_regional_availability"
       ]
     },
     "awslabs.aws-diagram-mcp-server": {
@@ -37,7 +34,7 @@
     "web_fetch",
     "introspect",
     "code",
-    "@awslabs.aws-documentation-mcp-server",
+    "@aws-knowledge-mcp-server",
     "@awslabs.aws-diagram-mcp-server"
   ],
   "allowedTools": [
@@ -48,7 +45,7 @@
     "web_fetch",
     "introspect",
     "code",
-    "@awslabs.aws-documentation-mcp-server",
+    "@aws-knowledge-mcp-server",
     "@awslabs.aws-diagram-mcp-server"
   ]
 }
